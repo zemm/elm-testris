@@ -8,25 +8,47 @@ type Coord = (Int,Int)
 
 -- @TODO: rotate by SRS, needs pivot?
 
-type Shape =
+type Piece =
   { tetromino:Tetromino
   , color:Color.Color
   , pos:Coord
   , rot:Int
-  , coords:[Coord]
+  , shape:[Coord]
   }
 
 data Tetromino = Custom | I | O | T | S | Z | J | L
 
---createRandom : Coord -> Shape
 
-create : Tetromino -> Coord -> Shape
+--
+-- Functionality
+--
+
+color : Piece -> Color
+color = .color
+
+-- @TODO: apply rotation and transformation
+project : Piece -> [Coord]
+
+rotateCW : Piece -> Piece
+
+rotateCCW : Piece -> Piece
+
+move : Dir -> Piece -> Piece
+
+--
+-- Factory
+--
+
+-- @TODO: lazy seedable random bag generator
+--createRandomBag : Int -> (Coord -> Piece)
+
+create : Tetromino -> Coord -> Piece
 create tetromino pos =
     { tetromino = tetromino
     , color = colorFor tetromino
     , pos = pos
     , rot = 0
-    , coords = coordsFor tetromino
+    , shape = shapeFor tetromino
     }
 
 colorFor : Tetromino -> Color.Color
@@ -40,8 +62,8 @@ colorFor tetromino =
         J -> Color.blue
         L -> Color.orange
 
-coordsFor : Tetromino -> [Coord]
-coordsFor tetromino =
+shapeFor : Tetromino -> [Coord]
+shapeFor tetromino =
     case tetromino of
         I -> [ (0,1),(1,1),(2,1),(3,1) ]
 
@@ -62,11 +84,3 @@ coordsFor tetromino =
 
         L -> [             (2,0)
              , (0,1),(1,1),(2,1)       ]
-
-projectShape : Shape -> [Coord]
-projectShape shape = shape.coords
-
--- TODO
-
-main = asText <| create T (0,0)
-
