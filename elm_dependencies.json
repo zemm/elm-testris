@@ -1,0 +1,10 @@
+{
+    "summary": "Yet Another Elm Tetris for learning",
+    "repository": "https://github.com/zemm/elm-testris",
+    "dependencies": {},
+    "exposed-modules": [],
+    "version": "0.0.1",
+    "elm-version": "0.13",
+    "license": "WTFPL2",
+    "description": ""
+}
