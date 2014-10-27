@@ -1,4 +1,4 @@
-INCOMPLETE TESTS - UNDER CONSTRUCTION!
+INCOMPLETE and not working atm
 ===
 
 Elm-TestTris
