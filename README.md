@@ -32,11 +32,11 @@ List
   + Bounds check
 
 Array
-  ~ Clear full rows (no `all`, not lazy when implemented with fold)
+  x Clear full rows (no `all`, not lazy when implemented with fold)
   + Render in order
-  ~ Collides with shape (O(log n)? per dimension)
-  ~ Insert shape
-  ~ Printing (requires toList >> reverse with rows)
+  x Collides with shape (O(log n)? per dimension)
+  x Insert shape
+  x Printing (requires toList >> reverse with rows)
   + Bounds check
 
 Dict
@@ -45,3 +45,5 @@ Dict
   + Collides with shape (`intersect`, O(log n)                                   )
   + Insert shape (`union`)
   - Bounds check
+
+-> Let's `Array Array` for now
