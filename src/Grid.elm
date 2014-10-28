@@ -3,10 +3,16 @@ module Grid where
 import Array
 import List
 
+-- @TODO: flip arguments so that data is last
+
 type Coord = (Int,Int)
 data Block = Empty | Full Color
 type Row = Array.Array Block
 type Grid = Array.Array Row
+
+initializeEmpty : Int -> Int -> Grid
+initializeEmpty width height =
+  Array.repeat height <| Array.repeat width Empty
 
 fromLists : [[Block]] -> Grid
 fromLists lists =
@@ -69,6 +75,33 @@ isEmpty grid coord =
 
 fits : Grid -> [Coord] -> Bool
 fits grid coords = List.all (isEmpty grid) coords
+
+contains : Coord -> Grid -> Bool
+contains coord grid =
+  let block = getBlock grid coord
+  in case block of
+    Just _  -> True
+    Nothing -> False
+
+-- Versions of set that always succeeds, does not modify if
+-- out of range (default Array set functionality)
+
+set : Block -> Coord -> Grid -> Grid
+set block coord grid =
+  let x = fst coord
+      y = snd coord
+      oldRow = Array.get y grid
+  in case oldRow of
+    Just row -> Array.set y (Array.set x block row) grid
+    Nothing  -> grid
+
+setMany : Block -> [Coord] -> Grid -> Grid
+setMany block coords grid =
+  let iter = \block coord g -> set block coord g
+  in List.foldl (iter block) grid coords
+
+-- Empty-checking versions; might not be needed, or they could be
+-- generalized with a predicate:
 
 fillEmptyInRow : Int -> Block -> Row -> Maybe Row
 fillEmptyInRow ndx block row =
