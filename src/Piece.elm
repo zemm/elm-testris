@@ -1,4 +1,4 @@
-module Tetromino where
+module Piece where
 
 import Color
 

@@ -9,8 +9,8 @@ import Debug
 
 import Grid (Block(..), Coord, Row, Grid)
 import Grid
-import Tetromino (Piece, upperBounds)
-import Tetromino
+import Piece (Piece, upperBounds)
+import Piece
 --import Input
 
 
@@ -28,7 +28,7 @@ grid = Grid.fromLists <| reverse
 getBlock' = Grid.getBlock grid
 isEmpty' = Grid.isEmpty grid
 fits' = Grid.fits grid
-piece1 = Tetromino.create Tetromino.L (0,0)
+piece1 = Piece.create Piece.L (0,0)
 
 main = flow down
   [ plainText "== piece upper bounds:"
