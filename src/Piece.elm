@@ -2,22 +2,22 @@ module Piece where
 
 import Color
 
-type Coord = (Int,Int)
-
 -- Try to follow http://tetris.wikia.com/wiki/Tetris_Guideline
-
 -- @TODO: rotate by SRS, needs pivot?
+
+type Coord = (Int,Int)
+type Shape = [Coord]
+type Rotation = Int
 
 type Piece =
   { tetromino:Tetromino
   , color:Color.Color
-  , pos:Coord
-  , rot:Int
-  , shape:[Coord]
+  , position:Coord
+  , rotation:Rotation
+  , shape:Shape
   }
 
 data Tetromino = Custom | I | O | T | S | Z | J | L
-
 
 --
 -- Functionality
@@ -25,21 +25,46 @@ data Tetromino = Custom | I | O | T | S | Z | J | L
 color : Piece -> Color
 color = .color
 
-upperBounds : Piece -> Coord
-upperBounds piece =
-  let (xs, ys) = unzip piece.shape
+upperBounds : Shape -> Coord
+upperBounds shape =
+  let (xs, ys) = unzip shape
   in (maximum xs, maximum ys)
 
-{-
--- @TODO: apply rotation and transformation
-project : Piece -> [Coord]
+lowerBounds : Shape -> Coord
+lowerBounds shape =
+  let (xs, ys) = unzip shape
+  in (minimum xs, minimum ys)
+
+-- apply rotation and translation
+project : Piece -> Shape
+project piece =
+  translateShape piece.position
+  <| rotateShape piece.rotation piece.shape
+
+rotateShape : Rotation -> Shape -> Shape
+rotateShape rotation shape =
+  let safeRot = rotation % 4
+      fun = case safeRot of
+        0 -> \(x, y) -> ( x,  y)
+        1 -> \(x, y) -> ( y, -x)
+        2 -> \(x, y) -> (-x, -y)
+        3 -> \(x, y) -> (-y,  x)
+  in map fun shape
+
+translateShape : Coord -> Shape -> Shape
+translateShape (dX, dY) shape =
+  map (\(x, y) -> (x+dX, y+dY)) shape
 
 rotateCW : Piece -> Piece
+rotateCW piece = { piece | rotation <- (piece.rotation + 1) % 4 }
 
 rotateCCW : Piece -> Piece
+rotateCCW piece = { piece | rotation <- (piece.rotation - 1) % 4 }
 
-move : Dir -> Piece -> Piece
---}
+move : Coord -> Piece -> Piece
+move (dX, dY) piece =
+  let (oldX, oldY) = piece.position
+  in { piece | position <- (oldX + dX, oldY + dY) }
 
 --
 -- Factory
@@ -49,11 +74,11 @@ move : Dir -> Piece -> Piece
 --createRandomBag : Int -> (Coord -> Piece)
 
 create : Tetromino -> Coord -> Piece
-create tetromino pos =
+create tetromino position =
     { tetromino = tetromino
     , color = colorFor tetromino
-    , pos = pos
-    , rot = 0
+    , position = position
+    , rotation = 0
     , shape = shapeFor tetromino
     }
 
@@ -68,25 +93,30 @@ colorFor tetromino =
         J -> Color.blue
         L -> Color.orange
 
-shapeFor : Tetromino -> [Coord]
+{-
+http://tetrisconcept.net/wiki/File:SRS-true-rotations.png
+http://tetrisconcept.net/wiki/images/3/3d/SRS-pieces.png
+-}
+shapeFor : Tetromino -> Shape
 shapeFor tetromino =
     case tetromino of
-        I -> [ (0,1),(1,1),(2,1),(3,1) ]
+        I -> [
+               (-1,0),(0,0),(1,0),(2,0) ]
 
-        O -> [       (1,0),(2,0)
-             ,       (1,1),(2,1)       ]
+        O -> [        (0,1),(1,1)
+             ,        (0,0),(1,0)       ]
 
-        T -> [       (1,0)
-             , (0,1),(1,1),(2,1)       ]
+        T -> [        (0,1)
+             , (-1,0),(0,0),(1,0)       ]
 
-        S -> [       (1,0),(2,1)
-             , (0,1),(1,1)             ]
+        S -> [        (0,1),(1,1)
+             , (-1,0),(0,0)             ]
 
-        Z -> [ (0,0),(1,0)
-             ,       (1,1),(2,1)       ]
+        Z -> [ (-1,1),(0,1)
+             ,        (0,0),(1,0)       ]
 
-        J -> [ (0,0)
-             , (0,1),(1,1),(2,1)       ]
+        J -> [ (-1,1)
+             , (-1,0),(0,0),(1,0)       ]
 
-        L -> [             (2,0)
-             , (0,1),(1,1),(2,1)       ]
+        L -> [              (1,1)
+             , (-1,0),(0,0),(1,0)       ]

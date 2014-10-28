@@ -9,7 +9,7 @@ import Debug
 
 import Grid (Block(..), Coord, Row, Grid)
 import Grid
-import Piece (Piece, upperBounds)
+import Piece (Piece)
 import Piece
 --import Input
 
@@ -28,13 +28,29 @@ grid = Grid.fromLists <| reverse
 getBlock' = Grid.getBlock grid
 isEmpty' = Grid.isEmpty grid
 fits' = Grid.fits grid
-piece1 = Piece.create Piece.L (0,0)
+pcs = [ Piece.create Piece.I (3,3)
+      , Piece.create Piece.O (3,3)
+      , Piece.create Piece.T (3,3)
+      , Piece.create Piece.S (3,3)
+      , Piece.create Piece.Z (3,3)
+      , Piece.create Piece.J (3,3)
+      , Piece.create Piece.L (3,3)
+      ]
+
+piece1 = Piece.create Piece.L (1,1)
 
 main = flow down
-  [ plainText "== piece upper bounds:"
-  , asText <| upperBounds piece1
-  , plainText "== rendered piece:"
-  , renderPiece piece1
+  [ plainText "== var_dump() developing 4lyfe! /o\\"
+  , plainText " -> rotation 0:"
+  , renderShape f <| Piece.project { piece1 | rotation <- 0 }
+  , plainText " -> rotation 1"
+  , renderShape f <| Piece.project { piece1 | rotation <- 1 }
+  , plainText " -> rotation 2"
+  , renderShape f <| Piece.project { piece1 | rotation <- 2 }
+  , plainText " -> rotation 3"
+  , renderShape f <| Piece.project { piece1 | rotation <- 3 }
+  , plainText " -> move"
+  , renderShape f <| Piece.project <| Piece.move (2,1) piece1
   , plainText "== initial grid:"
   , renderGrid grid
   , plainText "== grid getters:"
@@ -43,25 +59,27 @@ main = flow down
   , asText [ fits' [(0,0),(1,0),(2,0)] , fits' [(0,0),(1,1)] ]
   , plainText "== grid with full rows removed:"
   , renderGrid <| snd <| Grid.removeFullRows grid
-  , plainText "== grid fill:"
+  , plainText "== grid fill 0,0:"
   , renderGridM
     <| Grid.fillEmpty (Full Color.green) (0,0)
     <| Grid.fromLists (List.repeat 3 [e,e,e])
-  , plainText "== grid bulk fills:"
+  , plainText "== grid bulk fills from 0,0:"
   , renderGridM
     <| Grid.fillEmpties (Full Color.green) [(0,0),(1,0),(1,1),(2,1)]
     <| Grid.fromLists (List.repeat 4 [e,e,e,e,e])
   ]
 
 -- piece
-renderPiece : Piece -> Element
+renderPiece : Piece.Piece -> Element
 renderPiece piece =
-  let (maxX, maxY) = upperBounds piece
-      grid = Grid.initializeEmpty (maxX+1) (maxY+1)
-      block = Full piece.color
-      coords = piece.shape
-  in renderGrid (Grid.setMany block coords grid)
+  renderShape (Full piece.color) (Piece.project piece)
 
+renderShape : Grid.Block -> Piece.Shape -> Element
+renderShape block shape =
+  let (maxX, maxY) = Piece.upperBounds shape
+      gs = maximum [maxX+1, maxY+1]
+      grid = Grid.initializeEmpty (gs,gs)
+  in renderGrid (Grid.setMany block shape grid)
 
 -- grid
 renderGridM : Maybe Grid -> Element

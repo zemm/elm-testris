@@ -10,8 +10,8 @@ data Block = Empty | Full Color
 type Row = Array.Array Block
 type Grid = Array.Array Row
 
-initializeEmpty : Int -> Int -> Grid
-initializeEmpty width height =
+initializeEmpty : Coord -> Grid
+initializeEmpty (width, height) =
   Array.repeat height <| Array.repeat width Empty
 
 fromLists : [[Block]] -> Grid
