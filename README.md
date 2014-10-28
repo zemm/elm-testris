@@ -28,6 +28,10 @@ Todo
 ---
 
 ```
+Random
+ - separate shape from piece for nicer functions
+
+
 At least
 [/] Rotations
 [/] Moving
