@@ -2,17 +2,15 @@ module Piece where
 
 import Color
 
--- Try to follow http://tetris.wikia.com/wiki/Tetris_Guideline
--- @TODO: rotate by SRS, needs pivot?
-
-type Coord = (Int,Int)
-type Shape = [Coord]
+type Pos2 = (Int,Int)
+type Size2 = (Int,Int)
+type Shape = [Pos2]
 type Rotation = Int
 
 type Piece =
   { tetromino:Tetromino
   , color:Color.Color
-  , position:Coord
+  , position:Pos2
   , rotation:Rotation
   , shape:Shape
   }
@@ -25,15 +23,25 @@ data Tetromino = Custom | I | O | T | S | Z | J | L
 color : Piece -> Color
 color = .color
 
-upperBounds : Shape -> Coord
+upperBounds : Shape -> Pos2
 upperBounds shape =
   let (xs, ys) = unzip shape
   in (maximum xs, maximum ys)
 
-lowerBounds : Shape -> Coord
+lowerBounds : Shape -> Pos2
 lowerBounds shape =
   let (xs, ys) = unzip shape
   in (minimum xs, minimum ys)
+
+aabbPieceMax : Piece -> Int
+aabbPieceMax piece = shapeBBMax piece.shape
+
+aabbShapeMax : Shape -> Int
+aabbShapeMax shape =
+  let (xs, ys) = unzip shape
+      minXY = min (minimum xs) (minimum ys)
+      maxXY = max (maximum xs) (maximum ys)
+  in maxXY + 1 - minXY
 
 -- apply rotation and translation
 project : Piece -> Shape
@@ -51,7 +59,7 @@ rotateShape rotation shape =
         3 -> \(x, y) -> (-y,  x)
   in map fun shape
 
-translateShape : Coord -> Shape -> Shape
+translateShape : Pos2 -> Shape -> Shape
 translateShape (dX, dY) shape =
   map (\(x, y) -> (x+dX, y+dY)) shape
 
@@ -61,7 +69,7 @@ rotateCW piece = { piece | rotation <- (piece.rotation + 1) % 4 }
 rotateCCW : Piece -> Piece
 rotateCCW piece = { piece | rotation <- (piece.rotation - 1) % 4 }
 
-move : Coord -> Piece -> Piece
+move : Pos2 -> Piece -> Piece
 move (dX, dY) piece =
   let (oldX, oldY) = piece.position
   in { piece | position <- (oldX + dX, oldY + dY) }
@@ -71,9 +79,9 @@ move (dX, dY) piece =
 --
 
 -- @TODO: lazy seedable random bag generator
---createRandomBag : Int -> (Coord -> Piece)
+--createRandomBag : Int -> (Pos2 -> Piece)
 
-create : Tetromino -> Coord -> Piece
+create : Tetromino -> Pos2 -> Piece
 create tetromino position =
     { tetromino = tetromino
     , color = colorFor tetromino
