@@ -2,6 +2,7 @@ WIP - INCOMPLETE
 ===
 
 ...and probably will be left as such
+---
 
 
 Elm-TestTris
@@ -13,6 +14,7 @@ For a wobbly learning experience.
 Standards
 ---
 
+```
 Try to remember to follow
 http://tetris.wikia.com/wiki/Tetris_Guideline
 http://tetris.wikia.com/wiki/SRS
@@ -20,19 +22,20 @@ http://tetris.wikia.com/wiki/Guideline_compliant_game_differences
 http://tetrisconcept.net/wiki/SRS
 ..or ARS?
 http://tetrisconcept.net/wiki/ARS
-
+```
 
 Todo
 ---
 
+```
 At least
-[ ] Spawn
-[ ] Playfield is 10 cells wide and at least 22 cells tall, where rows above 20 are hidden or obstructed by the field frame
-[ ] Rotations
-[ ] Moving
-[ ] Exploding rows
-[ ] Graphical rending
+[/] Rotations
+[/] Moving
+[/] Exploding rows
+[ ] Spawn & Board - Playfield is 10 cells wide and at least 22 cells tall, where rows above 20 are hidden or obstructed by the field frame
+[ ] Graphics rending
 [ ] Score keeping
+[ ] Game model
 [ ] Reset
 [ ] Keyboard input
 
@@ -52,6 +55,7 @@ Propably not
 [ ] http://tetris.wikia.com/wiki/Floor_kick
 [ ] http://tetris.wikia.com/wiki/Twist
 
+```
 
 
 Deciding the board data structure
