@@ -22,10 +22,15 @@ data Tetromino = Custom | I | O | T | S | Z | J | L
 --
 -- Functionality
 --
-
 color : Piece -> Color
 color = .color
 
+upperBounds : Piece -> Coord
+upperBounds piece =
+  let (xs, ys) = unzip piece.shape
+  in (maximum xs, maximum ys)
+
+{-
 -- @TODO: apply rotation and transformation
 project : Piece -> [Coord]
 
@@ -34,6 +39,7 @@ rotateCW : Piece -> Piece
 rotateCCW : Piece -> Piece
 
 move : Dir -> Piece -> Piece
+--}
 
 --
 -- Factory
