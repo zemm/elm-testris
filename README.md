@@ -87,3 +87,9 @@ Dict
 ```
 
 -> Let's `Array Array` for now
+
+
+License
+---
+
+WTFPL2
