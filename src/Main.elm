@@ -57,7 +57,7 @@ main = flow down
 renderPiece : Piece -> Element
 renderPiece piece =
   let (maxX, maxY) = upperBounds piece
-      grid = Grid.initializeEmpty maxX maxY
+      grid = Grid.initializeEmpty (maxX+1) (maxY+1)
       block = Full piece.color
       coords = piece.shape
   in renderGrid (Grid.setMany block coords grid)
