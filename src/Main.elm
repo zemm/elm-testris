@@ -4,14 +4,16 @@ import String
 import Text
 import Color
 import Array
+import List
 import Debug
 
-import Board (Block, Coord, Grid, Row)
+import Grid (Block(..), Coord, Row, Grid)
+import Grid
+import Tetromino (Piece, upperBounds)
 import Tetromino
 --import Input
 
 
-{-
 -- Test grid
 e = Empty
 f = Full orange
@@ -23,30 +25,45 @@ grid = Grid.fromLists <| reverse
   , [e,e,e,f]
   ]
 --
-g2 = snd <| removeFullRows grid
-getBlock' = getBlock grid
-isEmpty' = isEmpty grid
-fits' = fits grid
---
+getBlock' = Grid.getBlock grid
+isEmpty' = Grid.isEmpty grid
+fits' = Grid.fits grid
+piece1 = Tetromino.create Tetromino.L (0,0)
+
 main = flow down
-  [ renderGrid grid
-  , plainText " "
+  [ plainText "== piece upper bounds:"
+  , asText <| upperBounds piece1
+  , plainText "== rendered piece:"
+  , renderPiece piece1
+  , plainText "== initial grid:"
+  , renderGrid grid
+  , plainText "== grid getters:"
   , asText [ getBlock' (0,0), getBlock' (3,0), getBlock' (6,0) ]
   , asText [ isEmpty' (0,0),  isEmpty' (3,0),  isEmpty' (6,0) ]
   , asText [ fits' [(0,0),(1,0),(2,0)] , fits' [(0,0),(1,1)] ]
-  , plainText " "
-  , renderGrid g2
-  , plainText " "
-  , renderGridM <| fillEmpty (Full Color.green) (1,2)
-    <| gridFromLists (repeat 3 [e,e,e])
-  , plainText " "
-  , renderGridM <| fillEmpties (Full Color.green) [(0,0),(1,0),(1,1),(2,1)]
-    <| gridFromLists (repeat 4 [e,e,e,e,e])
+  , plainText "== grid with full rows removed:"
+  , renderGrid <| snd <| Grid.removeFullRows grid
+  , plainText "== grid fill:"
+  , renderGridM
+    <| Grid.fillEmpty (Full Color.green) (0,0)
+    <| Grid.fromLists (List.repeat 3 [e,e,e])
+  , plainText "== grid bulk fills:"
+  , renderGridM
+    <| Grid.fillEmpties (Full Color.green) [(0,0),(1,0),(1,1),(2,1)]
+    <| Grid.fromLists (List.repeat 4 [e,e,e,e,e])
   ]
 
--}
+-- piece
+renderPiece : Piece -> Element
+renderPiece piece =
+  let (maxX, maxY) = upperBounds piece
+      grid = Grid.initializeEmpty maxX maxY
+      block = Full piece.color
+      coords = piece.shape
+  in renderGrid (Grid.setMany block coords grid)
 
 
+-- grid
 renderGridM : Maybe Grid -> Element
 renderGridM grid = case grid of
   Just g    -> renderGrid g
@@ -65,8 +82,6 @@ strRow row =
   <| map (\x -> if x == Empty then "-" else "X")
   <| Array.toList row
 
-
-{-
 blockSize = 40
 
 grad : Color -> Gradient
@@ -81,8 +96,8 @@ blockAsForm color = gradient (grad color) (rect blockSize blockSize)
 blockAsEl : Block -> Element
 blockAsEl block =
   let form = case block of
-        Empty    -> blockAsForm Color.lightGray
-        Filled c -> blockAsForm c
+        Empty  -> blockAsForm Color.lightGray
+        Full c -> blockAsForm c
   in collage blockSize blockSize [form]
 
 rowAsEl : Row -> Element
@@ -91,13 +106,6 @@ rowAsEl row =
 
 gridAsEl : Grid -> Element
 gridAsEl grid = flow down
+  <| Array.toList
   <| Array.map rowAsEl grid
 --  <| Array.reverse grid
-
-main = flow down
-  [ gridAsEl grid
-  , plainText "--"
-  --, gridAsEl <| fst grid2
-  ]
-
---}
