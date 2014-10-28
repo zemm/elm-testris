@@ -34,7 +34,7 @@ lowerBounds shape =
   in (minimum xs, minimum ys)
 
 aabbPieceMax : Piece -> Int
-aabbPieceMax piece = shapeBBMax piece.shape
+aabbPieceMax piece = aabbShapeMax piece.shape
 
 aabbShapeMax : Shape -> Int
 aabbShapeMax shape =

@@ -76,8 +76,7 @@ renderPiece piece =
 
 renderShape : Grid.Block -> Piece.Shape -> Element
 renderShape block shape =
-  let (maxX, maxY) = Piece.upperBounds shape
-      gs = maximum [maxX+1, maxY+1]
+  let gs = Piece.aabbShapeMax shape
       grid = Grid.initializeEmpty (gs,gs)
   in renderGrid (Grid.setMany block shape grid)
 
