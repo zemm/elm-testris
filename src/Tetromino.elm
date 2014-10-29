@@ -1,4 +1,4 @@
-module Piece where
+module Tetromino where
 
 import Color
 
@@ -34,13 +34,10 @@ lowerBounds shape =
   let (xs, ys) = unzip shape
   in (minimum xs, minimum ys)
 
-aabbMaxTetromino : Tetromino -> Int
-aabbMaxTetromino tetromino = aabbShapeMax tetromino.shape
-
-aabbShapeMax : Shape -> Int
-aabbShapeMax shape =
+aabbMax : Shape -> Int
+aabbMax shape =
   let (xs, ys) = unzip shape
-      minXY = min (minimum xs) (minimum ys)
+      minXY = min 0 (min (minimum xs) (minimum ys))
       maxXY = max (maximum xs) (maximum ys)
   in maxXY + 1 - minXY
 

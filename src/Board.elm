@@ -15,7 +15,7 @@ type Row = Array.Array BlockType
 
 type Grid = Array.Array Row
 
--- Alias default functions for selected internal datatype
+-- Alias common functions for selected internal datatype
 
 map = Array.map
 
@@ -85,8 +85,8 @@ isEmpty coord grid =
     Just Empty -> True
     otherwise  -> False
 
-areEmpty : Shape -> Grid -> Bool
-areEmpty coords grid = List.all (\c -> isEmpty c grid) coords
+shapeFits : Shape -> Grid -> Bool
+shapeFits shape grid = List.all (\c -> isEmpty c grid) shape
 
 contains : Pos2 -> Grid -> Bool
 contains coord grid =
@@ -115,26 +115,26 @@ setShape shape blockType grid =
 -- setters that fail if targets are not empty or are out of bounds
 -- Could be generalized with a predicate
 
-fillEmpty : BlockType -> Pos2 -> Grid -> Maybe Grid
-fillEmpty blockType coord grid =
+fillEmpty : Pos2 -> BlockType -> Grid -> Maybe Grid
+fillEmpty coord blockType grid =
   let x = fst coord
       y = snd coord
       oldRow = Array.get y grid
       newRow = case oldRow of
-        Just row -> fillEmptyInRow x blockType row
+        Just row -> fillEmptyInRow y blockType row
         Nothing  -> Nothing
   in case newRow of
     Just nr -> Just (Array.set y nr grid)
     Nothing -> Nothing
 
-fillShapeEmpty : BlockType -> Shape -> Grid -> Maybe Grid
-fillShapeEmpty blockType coords grid =
-  List.foldl (fillEmptyM blockType) (Just grid) coords
+fillShapeEmpty : Shape -> BlockType -> Grid -> Maybe Grid
+fillShapeEmpty shape blockType grid =
+  List.foldl (\c -> fillEmptyM c blockType) (Just grid) shape
 
-fillEmptyM : BlockType -> Pos2 -> Maybe Grid -> Maybe Grid
-fillEmptyM blockType coord grid =
+fillEmptyM : Pos2 -> BlockType -> Maybe Grid -> Maybe Grid
+fillEmptyM coord blockType grid =
   case grid of
-    Just g  -> fillEmpty blockType coord g
+    Just g  -> fillEmpty coord blockType g
     Nothing -> Nothing
 
 fillEmptyInRow : Int -> BlockType -> Row -> Maybe Row
