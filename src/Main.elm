@@ -25,9 +25,9 @@ grid = Grid.fromLists <| reverse
   , [e,e,e,f]
   ]
 --
-getBlock' = Grid.getBlock grid
-isEmpty' = Grid.isEmpty grid
-fits' = Grid.fits grid
+getBlock' b = Grid.getBlock b grid
+isEmpty' b = Grid.isEmpty b grid
+areEmpty' cs = Grid.areEmpty cs grid
 pcs = [ Piece.create Piece.I (3,3)
       , Piece.create Piece.O (3,3)
       , Piece.create Piece.T (3,3)
@@ -37,7 +37,8 @@ pcs = [ Piece.create Piece.I (3,3)
       , Piece.create Piece.L (3,3)
       ]
 
-piece1 = Piece.create Piece.L (1,1)
+-- TODO: Piece.aabbShapeMax is broken with O-piece
+piece1 = Piece.create Piece.I (1,1)
 
 main = flow down
   [ plainText "== var_dump() developing 4lyfe! /o\\"
@@ -56,7 +57,7 @@ main = flow down
   , plainText "== grid getters:"
   , asText [ getBlock' (0,0), getBlock' (3,0), getBlock' (6,0) ]
   , asText [ isEmpty' (0,0),  isEmpty' (3,0),  isEmpty' (6,0) ]
-  , asText [ fits' [(0,0),(1,0),(2,0)] , fits' [(0,0),(1,1)] ]
+  , asText [ areEmpty' [(0,0),(1,0),(2,0)] , areEmpty' [(0,0),(1,1)] ]
   , plainText "== grid with full rows removed:"
   , renderGrid <| snd <| Grid.removeFullRows grid
   , plainText "== grid fill 0,0:"
@@ -65,7 +66,7 @@ main = flow down
     <| Grid.fromLists (List.repeat 3 [e,e,e])
   , plainText "== grid bulk fills from 0,0:"
   , renderGridM
-    <| Grid.fillEmpties (Full Color.green) [(0,0),(1,0),(1,1),(2,1)]
+    <| Grid.fillEmptyMany (Full Color.green) [(0,0),(1,0),(1,1),(2,1)]
     <| Grid.fromLists (List.repeat 4 [e,e,e,e,e])
   ]
 

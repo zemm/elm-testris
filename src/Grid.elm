@@ -22,25 +22,14 @@ toLists : Grid -> [[Block]]
 toLists grid =
     Array.toList <| Array.map Array.toList grid
 
-all : (a -> Bool) -> Array.Array a -> Bool
-all f a =
-  let iter = \f x acc -> if acc then f x else acc
-  in Array.foldl (iter f) True a
-
 isFullRow : Row -> Bool
-isFullRow row = all (\x -> not (x == Empty)) row
+isFullRow row =
+  let iter = \f x acc -> if acc then f x else acc
+      all f a = Array.foldl (iter f) True a
+  in all (\x -> not (x == Empty)) row
 
 clearRow : Row -> Row
 clearRow row = Array.repeat (Array.length row) Empty
-
-fullnessGrouper : Row -> (Grid,Grid) -> (Grid,Grid)
-fullnessGrouper row acc =
-  if | isFullRow row -> (Array.push row (fst acc), snd acc)
-     | otherwise     -> (fst acc, Array.push row (snd acc))
-
-groupByFullness : Grid -> (Grid, Grid)
-groupByFullness grid =
-  Array.foldl fullnessGrouper (Array.empty, Array.empty) grid
 
 removeFullRows : Grid -> (Int, Grid)
 removeFullRows grid =
@@ -48,6 +37,13 @@ removeFullRows grid =
       newRows = Array.map clearRow fullRows
       fullRowCount = Array.length fullRows
   in (fullRowCount, Array.append nonFullRows newRows)
+
+groupByFullness : Grid -> (Grid, Grid)
+groupByFullness grid =
+  let grouper row acc =
+        if | isFullRow row -> (Array.push row (fst acc), snd acc)
+           | otherwise     -> (fst acc, Array.push row (snd acc))
+  in Array.foldl grouper (Array.empty, Array.empty) grid
 
 width : Grid -> Int
 width grid =
@@ -59,31 +55,31 @@ width grid =
 height : Grid -> Int
 height grid = Array.length grid
 
-getBlock : Grid -> Coord -> Maybe Block
-getBlock grid coord =
+getBlock : Coord -> Grid -> Maybe Block
+getBlock coord grid =
   let row = Array.get (snd coord) grid
   in case row of
      Just r  -> Array.get (fst coord) r
      Nothing -> Nothing
 
-isEmpty : Grid -> Coord -> Bool
-isEmpty grid coord =
-  let block = getBlock grid coord
+isEmpty : Coord -> Grid -> Bool
+isEmpty coord grid =
+  let block = getBlock coord grid
   in case block of
     Just Empty -> True
     otherwise  -> False
 
-fits : Grid -> [Coord] -> Bool
-fits grid coords = List.all (isEmpty grid) coords
+areEmpty : [Coord] -> Grid -> Bool
+areEmpty coords grid = List.all (\c -> isEmpty c grid) coords
 
 contains : Coord -> Grid -> Bool
 contains coord grid =
-  let block = getBlock grid coord
+  let block = getBlock coord grid
   in case block of
     Just _  -> True
     Nothing -> False
 
--- Versions of set that always succeeds, does not modify if
+-- setters that always succeeds, does not modify if
 -- out of range (default Array set functionality)
 
 set : Block -> Coord -> Grid -> Grid
@@ -100,15 +96,8 @@ setMany block coords grid =
   let iter = \block coord g -> set block coord g
   in List.foldl (iter block) grid coords
 
--- Empty-checking versions; might not be needed, or they could be
--- generalized with a predicate:
-
-fillEmptyInRow : Int -> Block -> Row -> Maybe Row
-fillEmptyInRow ndx block row =
-  let oldBlock = Array.get ndx row
-  in case oldBlock of
-    Just Empty -> Just (Array.set ndx block row)
-    otherwise  -> Nothing
+-- setters that fail if targets are not empty or are out of bounds
+-- Could be generalized with a predicate
 
 fillEmpty : Block -> Coord -> Grid -> Maybe Grid
 fillEmpty block coord grid =
@@ -122,13 +111,19 @@ fillEmpty block coord grid =
     Just nr -> Just (Array.set y nr grid)
     Nothing -> Nothing
 
+fillEmptyMany : Block -> [Coord] -> Grid -> Maybe Grid
+fillEmptyMany block coords grid =
+  List.foldl (fillEmptyM block) (Just grid) coords
+
 fillEmptyM : Block -> Coord -> Maybe Grid -> Maybe Grid
 fillEmptyM block coord grid =
   case grid of
     Just g  -> fillEmpty block coord g
     Nothing -> Nothing
 
-fillEmpties : Block -> [Coord] -> Grid -> Maybe Grid
-fillEmpties block coords grid =
-  List.foldl (fillEmptyM block) (Just grid) coords
-
+fillEmptyInRow : Int -> Block -> Row -> Maybe Row
+fillEmptyInRow ndx block row =
+  let oldBlock = Array.get ndx row
+  in case oldBlock of
+    Just Empty -> Just (Array.set ndx block row)
+    otherwise  -> Nothing
