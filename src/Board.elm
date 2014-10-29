@@ -3,8 +3,6 @@ module Board where
 import Array
 import List
 
--- @TODO: flip arguments so that data is last
-
 type Pos2 = (Int,Int)
 
 type Shape = [Pos2]
