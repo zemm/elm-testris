@@ -35,7 +35,7 @@ pcs = [ Tetromino.create Tetromino.I (3,3)
       , Tetromino.create Tetromino.L (3,3)
       ]
 
-piece1 = Tetromino.create Tetromino.O (1,1)
+piece1 = Tetromino.create Tetromino.I (1,1)
 
 main = flow down
   [ plainText "== var_dump() developing 4lyfe! /o\\"
@@ -74,7 +74,7 @@ renderTetromino piece =
 
 renderShape : Board.BlockType -> Board.Shape -> Element
 renderShape blockType shape =
-  let gs = Tetromino.aabbMax shape
+  let gs = 6 --Tetromino.shapeAabbMax shape
       grid = Board.initializeEmpty (gs,gs)
   in renderGrid (Board.setShape shape blockType grid)
 
