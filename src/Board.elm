@@ -13,6 +13,7 @@ type Row = Array.Array BlockType
 
 type Grid = Array.Array Row
 
+
 -- Alias common functions for selected internal datatype
 
 map = Array.map
@@ -20,6 +21,8 @@ map = Array.map
 indexedMap = Array.indexedMap
 
 toList = Array.toList
+
+slice = Array.slice
 
 all f a =
   let iter = \f x acc -> if acc then f x else acc
