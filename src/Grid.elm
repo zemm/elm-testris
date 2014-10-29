@@ -5,20 +5,25 @@ import List
 
 -- @TODO: flip arguments so that data is last
 
-type Coord = (Int,Int)
-data Block = Empty | Full Color
-type Row = Array.Array Block
+type Pos2 = (Int,Int)
+
+type Shape = [Pos2]
+
+data BlockType = Empty | Full Color
+
+type Row = Array.Array BlockType
+
 type Grid = Array.Array Row
 
-initializeEmpty : Coord -> Grid
+initializeEmpty : Pos2 -> Grid
 initializeEmpty (width, height) =
   Array.repeat height <| Array.repeat width Empty
 
-fromLists : [[Block]] -> Grid
+fromLists : [[BlockType]] -> Grid
 fromLists lists =
   Array.fromList <| List.map Array.fromList lists
 
-toLists : Grid -> [[Block]]
+toLists : Grid -> [[BlockType]]
 toLists grid =
     Array.toList <| Array.map Array.toList grid
 
@@ -55,75 +60,75 @@ width grid =
 height : Grid -> Int
 height grid = Array.length grid
 
-getBlock : Coord -> Grid -> Maybe Block
-getBlock coord grid =
+getBlockType : Pos2 -> Grid -> Maybe BlockType
+getBlockType coord grid =
   let row = Array.get (snd coord) grid
   in case row of
      Just r  -> Array.get (fst coord) r
      Nothing -> Nothing
 
-isEmpty : Coord -> Grid -> Bool
+isEmpty : Pos2 -> Grid -> Bool
 isEmpty coord grid =
-  let block = getBlock coord grid
-  in case block of
+  let blockType = getBlockType coord grid
+  in case blockType of
     Just Empty -> True
     otherwise  -> False
 
-areEmpty : [Coord] -> Grid -> Bool
+areEmpty : Shape -> Grid -> Bool
 areEmpty coords grid = List.all (\c -> isEmpty c grid) coords
 
-contains : Coord -> Grid -> Bool
+contains : Pos2 -> Grid -> Bool
 contains coord grid =
-  let block = getBlock coord grid
-  in case block of
+  let blockType = getBlockType coord grid
+  in case blockType of
     Just _  -> True
     Nothing -> False
 
 -- setters that always succeeds, does not modify if
 -- out of range (default Array set functionality)
 
-set : Block -> Coord -> Grid -> Grid
-set block coord grid =
+set : BlockType -> Pos2 -> Grid -> Grid
+set blockType coord grid =
   let x = fst coord
       y = snd coord
       oldRow = Array.get y grid
   in case oldRow of
-    Just row -> Array.set y (Array.set x block row) grid
+    Just row -> Array.set y (Array.set x blockType row) grid
     Nothing  -> grid
 
-setMany : Block -> [Coord] -> Grid -> Grid
-setMany block coords grid =
-  let iter = \block coord g -> set block coord g
-  in List.foldl (iter block) grid coords
+setShape : BlockType -> Shape -> Grid -> Grid
+setShape blockType coords grid =
+  let iter = \blockType coord g -> set blockType coord g
+  in List.foldl (iter blockType) grid coords
 
 -- setters that fail if targets are not empty or are out of bounds
 -- Could be generalized with a predicate
 
-fillEmpty : Block -> Coord -> Grid -> Maybe Grid
-fillEmpty block coord grid =
+fillEmpty : BlockType -> Pos2 -> Grid -> Maybe Grid
+fillEmpty blockType coord grid =
   let x = fst coord
       y = snd coord
       oldRow = Array.get y grid
       newRow = case oldRow of
-        Just row -> fillEmptyInRow x block row
+        Just row -> fillEmptyInRow x blockType row
         Nothing  -> Nothing
   in case newRow of
     Just nr -> Just (Array.set y nr grid)
     Nothing -> Nothing
 
-fillEmptyMany : Block -> [Coord] -> Grid -> Maybe Grid
-fillEmptyMany block coords grid =
-  List.foldl (fillEmptyM block) (Just grid) coords
+fillShapeEmpty : BlockType -> Shape -> Grid -> Maybe Grid
+fillShapeEmpty blockType coords grid =
+  List.foldl (fillEmptyM blockType) (Just grid) coords
 
-fillEmptyM : Block -> Coord -> Maybe Grid -> Maybe Grid
-fillEmptyM block coord grid =
+fillEmptyM : BlockType -> Pos2 -> Maybe Grid -> Maybe Grid
+fillEmptyM blockType coord grid =
   case grid of
-    Just g  -> fillEmpty block coord g
+    Just g  -> fillEmpty blockType coord g
     Nothing -> Nothing
 
-fillEmptyInRow : Int -> Block -> Row -> Maybe Row
-fillEmptyInRow ndx block row =
-  let oldBlock = Array.get ndx row
-  in case oldBlock of
-    Just Empty -> Just (Array.set ndx block row)
+fillEmptyInRow : Int -> BlockType -> Row -> Maybe Row
+fillEmptyInRow ndx blockType row =
+  let oldBlockType = Array.get ndx row
+  in case oldBlockType of
+    Just Empty -> Just (Array.set ndx blockType row)
     otherwise  -> Nothing

@@ -3,24 +3,25 @@ module Piece where
 import Color
 
 type Pos2 = (Int,Int)
-type Size2 = (Int,Int)
+
 type Shape = [Pos2]
+
 type Rotation = Int
 
-type Piece =
-  { tetromino:Tetromino
+type Tetromino =
+  { kind:Kind
   , color:Color.Color
   , position:Pos2
   , rotation:Rotation
   , shape:Shape
   }
 
-data Tetromino = Custom | I | O | T | S | Z | J | L
+data Kind = Custom | I | O | T | S | Z | J | L
 
 --
 -- Functionality
 --
-color : Piece -> Color
+color : Tetromino -> Color
 color = .color
 
 upperBounds : Shape -> Pos2
@@ -33,8 +34,8 @@ lowerBounds shape =
   let (xs, ys) = unzip shape
   in (minimum xs, minimum ys)
 
-aabbPieceMax : Piece -> Int
-aabbPieceMax piece = aabbShapeMax piece.shape
+aabbMaxTetromino : Tetromino -> Int
+aabbMaxTetromino tetromino = aabbShapeMax tetromino.shape
 
 aabbShapeMax : Shape -> Int
 aabbShapeMax shape =
@@ -44,10 +45,10 @@ aabbShapeMax shape =
   in maxXY + 1 - minXY
 
 -- apply rotation and translation
-project : Piece -> Shape
-project piece =
-  translateShape piece.position
-  <| rotateShape piece.rotation piece.shape
+project : Tetromino -> Shape
+project tetromino =
+  translateShape tetromino.position
+  <| rotateShape tetromino.rotation tetromino.shape
 
 rotateShape : Rotation -> Shape -> Shape
 rotateShape rotation shape =
@@ -63,34 +64,34 @@ translateShape : Pos2 -> Shape -> Shape
 translateShape (dX, dY) shape =
   map (\(x, y) -> (x+dX, y+dY)) shape
 
-rotateCW : Piece -> Piece
-rotateCW piece = { piece | rotation <- (piece.rotation + 1) % 4 }
+rotateCW : Tetromino -> Tetromino
+rotateCW tetromino = { tetromino | rotation <- (tetromino.rotation + 1) % 4 }
 
-rotateCCW : Piece -> Piece
-rotateCCW piece = { piece | rotation <- (piece.rotation - 1) % 4 }
+rotateCCW : Tetromino -> Tetromino
+rotateCCW tetromino = { tetromino | rotation <- (tetromino.rotation - 1) % 4 }
 
-move : Pos2 -> Piece -> Piece
-move (dX, dY) piece =
-  let (oldX, oldY) = piece.position
-  in { piece | position <- (oldX + dX, oldY + dY) }
+move : Pos2 -> Tetromino -> Tetromino
+move (dX, dY) tetromino =
+  let (oldX, oldY) = tetromino.position
+  in { tetromino | position <- (oldX + dX, oldY + dY) }
 
 --
 -- Factory
 --
 
 -- @TODO: lazy seedable random bag generator
---createRandomBag : Int -> (Pos2 -> Piece)
+--createRandomBag : Int -> (Pos2 -> Tetromino)
 
-create : Tetromino -> Pos2 -> Piece
-create tetromino position =
-    { tetromino = tetromino
-    , color = colorFor tetromino
+create : Kind -> Pos2 -> Tetromino
+create kind position =
+    { kind = kind
+    , color = colorFor kind
     , position = position
     , rotation = 0
-    , shape = shapeFor tetromino
+    , shape = shapeFor kind
     }
 
-colorFor : Tetromino -> Color.Color
+colorFor : Kind -> Color.Color
 colorFor tetromino =
     case tetromino of
         I -> Color.rgb 0 255 255 --cyan
@@ -105,7 +106,7 @@ colorFor tetromino =
 http://tetrisconcept.net/wiki/File:SRS-true-rotations.png
 http://tetrisconcept.net/wiki/images/3/3d/SRS-pieces.png
 -}
-shapeFor : Tetromino -> Shape
+shapeFor : Kind -> Shape
 shapeFor tetromino =
     case tetromino of
         I -> [

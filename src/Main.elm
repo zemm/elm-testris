@@ -7,16 +7,14 @@ import Array
 import List
 import Debug
 
-import Grid (Block(..), Coord, Row, Grid)
 import Grid
-import Piece (Piece)
 import Piece
 --import Input
 
 
 -- Test grid
-e = Empty
-f = Full orange
+e = Grid.Empty
+f = Grid.Full orange
 
 grid = Grid.fromLists <| reverse
   [ [f,f,f,e]
@@ -25,7 +23,7 @@ grid = Grid.fromLists <| reverse
   , [e,e,e,f]
   ]
 --
-getBlock' b = Grid.getBlock b grid
+getBT' bt = Grid.getBlockType bt grid
 isEmpty' b = Grid.isEmpty b grid
 areEmpty' cs = Grid.areEmpty cs grid
 pcs = [ Piece.create Piece.I (3,3)
@@ -55,49 +53,49 @@ main = flow down
   , plainText "== initial grid:"
   , renderGrid grid
   , plainText "== grid getters:"
-  , asText [ getBlock' (0,0), getBlock' (3,0), getBlock' (6,0) ]
+  , asText [ getBT' (0,0), getBT' (3,0), getBT' (6,0) ]
   , asText [ isEmpty' (0,0),  isEmpty' (3,0),  isEmpty' (6,0) ]
   , asText [ areEmpty' [(0,0),(1,0),(2,0)] , areEmpty' [(0,0),(1,1)] ]
   , plainText "== grid with full rows removed:"
   , renderGrid <| snd <| Grid.removeFullRows grid
   , plainText "== grid fill 0,0:"
   , renderGridM
-    <| Grid.fillEmpty (Full Color.green) (0,0)
+    <| Grid.fillEmpty (Grid.Full Color.green) (0,0)
     <| Grid.fromLists (List.repeat 3 [e,e,e])
   , plainText "== grid bulk fills from 0,0:"
   , renderGridM
-    <| Grid.fillEmptyMany (Full Color.green) [(0,0),(1,0),(1,1),(2,1)]
+    <| Grid.fillShapeEmpty (Grid.Full Color.green) [(0,0),(1,0),(1,1),(2,1)]
     <| Grid.fromLists (List.repeat 4 [e,e,e,e,e])
   ]
 
 -- piece
-renderPiece : Piece.Piece -> Element
-renderPiece piece =
-  renderShape (Full piece.color) (Piece.project piece)
+renderTetromino : Piece.Tetromino -> Element
+renderTetromino piece =
+  renderShape (Grid.Full piece.color) (Piece.project piece)
 
-renderShape : Grid.Block -> Piece.Shape -> Element
-renderShape block shape =
+renderShape : Grid.BlockType -> Grid.Shape -> Element
+renderShape blockType shape =
   let gs = Piece.aabbShapeMax shape
       grid = Grid.initializeEmpty (gs,gs)
-  in renderGrid (Grid.setMany block shape grid)
+  in renderGrid (Grid.setShape blockType shape grid)
 
 -- grid
-renderGridM : Maybe Grid -> Element
+renderGridM : Maybe Grid.Grid -> Element
 renderGridM grid = case grid of
   Just g    -> renderGrid g
   otherwise -> leftAligned << monospace <| toText "No grid"
 
-renderGrid : Grid -> Element
+renderGrid : Grid.Grid -> Element
 renderGrid grid = leftAligned << monospace << toText <| strGrid grid
 
-strGrid : Grid -> String
+strGrid : Grid.Grid -> String
 strGrid grid =
   String.join "\n" <| map strRow (reverse (Array.toList grid))
 
-strRow : Row -> String
+strRow : Grid.Row -> String
 strRow row =
   String.join ""
-  <| map (\x -> if x == Empty then "-" else "X")
+  <| map (\x -> if x == Grid.Empty then "-" else "X")
   <| Array.toList row
 
 blockSize = 40
@@ -111,18 +109,18 @@ grad color = radial (-10,10) (blockSize / 2.5) (0,0) 90
 blockAsForm : Color -> Form
 blockAsForm color = gradient (grad color) (rect blockSize blockSize)
 
-blockAsEl : Block -> Element
-blockAsEl block =
-  let form = case block of
-        Empty  -> blockAsForm Color.lightGray
-        Full c -> blockAsForm c
+blockAsEl : Grid.BlockType -> Element
+blockAsEl blockType =
+  let form = case blockType of
+        Grid.Empty  -> blockAsForm Color.lightGray
+        Grid.Full c -> blockAsForm c
   in collage blockSize blockSize [form]
 
-rowAsEl : Row -> Element
+rowAsEl : Grid.Row -> Element
 rowAsEl row =
   flow right <| Array.toList <| Array.map blockAsEl row
 
-gridAsEl : Grid -> Element
+gridAsEl : Grid.Grid -> Element
 gridAsEl grid = flow down
   <| Array.toList
   <| Array.map rowAsEl grid
