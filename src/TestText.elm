@@ -7,7 +7,7 @@ import Array
 import List
 import Debug
 
-import Grid
+import Board
 import Piece
 --import Input
 

@@ -1,4 +1,4 @@
-module Grid where
+module Board where
 
 import Array
 import List

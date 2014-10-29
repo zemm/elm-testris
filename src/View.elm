@@ -3,12 +3,12 @@ module View where
 import Color
 import Window
 
-import Grid
+import Board
 
-renderBoard : Float -> Grid.Grid -> Element
+renderBoard : Float -> Board.Grid -> Element
 renderBoard side board =
-  let w = (ceiling side) * (Grid.width board)
-      h = (ceiling side) * (Grid.height board)
+  let w = (ceiling side) * (Board.width board)
+      h = (ceiling side) * (Board.height board)
       (fw, fh) = (toFloat w, toFloat h)
       (hw, hh) = (fw / 2, fh / 2)
       hs = side / 2
@@ -17,21 +17,21 @@ renderBoard side board =
       fBoard = move (ox, oy) <| boardForm side board
   in collage w h [fBoard, fCenter]
 
-boardForm : Float -> Grid.Grid -> Form
+boardForm : Float -> Board.Grid -> Form
 boardForm side board =
   let iter = \i r -> moveY ((toFloat i)*side) <| rowForm side r
-  in group <| Grid.toList <| Grid.indexedMap iter board
+  in group <| Board.toList <| Board.indexedMap iter board
 
-rowForm : Float -> Grid.Row -> Form
+rowForm : Float -> Board.Row -> Form
 rowForm side blocks =
   let iter = \i b -> moveX ((toFloat i)*side) <| blockForm side b
-  in group <| Grid.toList <| Grid.indexedMap iter blocks
+  in group <| Board.toList <| Board.indexedMap iter blocks
 
-blockForm : Float -> Grid.BlockType -> Form
+blockForm : Float -> Board.BlockType -> Form
 blockForm side block =
   case block of
-    Grid.Full c -> fullBlockForm side c
-    Grid.Empty  -> emptyBlockForm side Color.lightGray
+    Board.Full c -> fullBlockForm side c
+    Board.Empty  -> emptyBlockForm side Color.lightGray
 
 emptyBlockForm : Float -> Color -> Form
 emptyBlockForm side color =
