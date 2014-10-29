@@ -40,5 +40,7 @@ emptyBlockForm side color =
 fullBlockForm : Float -> Color -> Form
 fullBlockForm side color =
   let colors = [(0, color), (1, Color.black)]
-      grad = radial (0,0) (side/3.5) (-30,30) 70 colors
+      innerRadius = side * 0.25
+      outerRadius = side * 2.50
+      grad = radial (0,0) innerRadius (-side,side) outerRadius colors
   in gradient grad <| (rect side side)

@@ -29,14 +29,20 @@ board = Board.fromLists <| List.reverse
 
 b2 = Board.set (0,0) (Board.Full Color.yellow) board
 
-b2h = Board.height b2
+bh = Board.height b2
 
 splitAt = 3
 
-main = flow down
-  [ plainText <| "Board size: " ++ (show (Board.width board, Board.height board))
-  , plainText <| "top " ++ (show splitAt) ++ " lines:"
-  , View.renderBoard 30 <| Board.slice (b2h - splitAt) b2h b2
-  , plainText "rest of the board:"
-  , View.renderBoard 30 <| Board.slice 0 (b2h - splitAt) b2
-  ]
+render blockSize =
+  flow down
+    [ plainText <| "Board size: " ++ (show (Board.width board, Board.height board))
+    , plainText <| "top " ++ (show splitAt) ++ " lines:"
+    , View.renderBoard blockSize <| Board.slice (bh - splitAt) bh b2
+    , plainText "rest of the board:"
+    , View.renderBoard blockSize <| Board.slice 0 (bh - splitAt) b2
+    ]
+
+adaptiveBlockSize = lift (\x -> toFloat (x // (bh+3))) Window.height
+main = lift render adaptiveBlockSize
+
+main' = render 30
