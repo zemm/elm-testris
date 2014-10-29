@@ -1,9 +1,11 @@
 import Window
+import Keyboard
 import Color
 import Array
 import List
 
 import Board
+import Tetromino
 import View
 
 b = Board.Full Color.blue
@@ -29,20 +31,25 @@ board = Board.fromLists <| List.reverse
 
 b2 = Board.set (0,0) (Board.Full Color.yellow) board
 
+bw = Board.width b2
 bh = Board.height b2
+
+piece = Tetromino.create Tetromino.I (bw//2, bh//2)
 
 splitAt = 3
 
-render blockSize =
-  flow down
-    [ plainText <| "Board size: " ++ (show (Board.width board, Board.height board))
+render piece blockSize =
+  let b3 = Board.setShape (Tetromino.project piece) (Board.Full piece.color) b2
+  in flow down
+    [ plainText <| "Board size: " ++ (show (bw, bh))
     , plainText <| "top " ++ (show splitAt) ++ " lines:"
-    , View.renderBoard blockSize <| Board.slice (bh - splitAt) bh b2
+    , View.renderBoard blockSize <| Board.slice (bh - splitAt) bh b3
     , plainText "rest of the board:"
-    , View.renderBoard blockSize <| Board.slice 0 (bh - splitAt) b2
+    , View.renderBoard blockSize <| Board.slice 0 (bh - splitAt) b3
     ]
 
 adaptiveBlockSize = lift (\x -> toFloat (x // (bh+3))) Window.height
-main = lift render adaptiveBlockSize
+xmain = lift (render piece) adaptiveBlockSize
 
-main' = render 30
+step dir p = Tetromino.move (dir.x, dir.y) p
+main = lift (\p -> render p 30) <| foldp step piece Keyboard.arrows
