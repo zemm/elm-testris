@@ -15,6 +15,20 @@ type Row = Array.Array BlockType
 
 type Grid = Array.Array Row
 
+-- Alias default functions for selected internal datatype
+
+map = Array.map
+
+indexedMap = Array.indexedMap
+
+toList = Array.toList
+
+all f a =
+  let iter = \f x acc -> if acc then f x else acc
+  in Array.foldl (iter f) True a
+
+--
+
 initializeEmpty : Pos2 -> Grid
 initializeEmpty (width, height) =
   Array.repeat height <| Array.repeat width Empty
@@ -28,10 +42,7 @@ toLists grid =
     Array.toList <| Array.map Array.toList grid
 
 isFullRow : Row -> Bool
-isFullRow row =
-  let iter = \f x acc -> if acc then f x else acc
-      all f a = Array.foldl (iter f) True a
-  in all (\x -> not (x == Empty)) row
+isFullRow row = all (\x -> not (x == Empty)) row
 
 clearRow : Row -> Row
 clearRow row = Array.repeat (Array.length row) Empty
@@ -87,8 +98,8 @@ contains coord grid =
 -- setters that always succeeds, does not modify if
 -- out of range (default Array set functionality)
 
-set : BlockType -> Pos2 -> Grid -> Grid
-set blockType coord grid =
+set : Pos2 -> BlockType -> Grid -> Grid
+set coord blockType grid =
   let x = fst coord
       y = snd coord
       oldRow = Array.get y grid
@@ -96,10 +107,10 @@ set blockType coord grid =
     Just row -> Array.set y (Array.set x blockType row) grid
     Nothing  -> grid
 
-setShape : BlockType -> Shape -> Grid -> Grid
-setShape blockType coords grid =
-  let iter = \blockType coord g -> set blockType coord g
-  in List.foldl (iter blockType) grid coords
+setShape : Shape -> BlockType -> Grid -> Grid
+setShape shape blockType grid =
+  let iter = \blockType coord g -> set coord blockType g
+  in List.foldl (iter blockType) grid shape
 
 -- setters that fail if targets are not empty or are out of bounds
 -- Could be generalized with a predicate
