@@ -21,6 +21,10 @@ data Kind = I | O | T | S | Z | J | L
 --
 -- Functionality
 --
+
+kinds : [Kind]
+kinds = [I,O,T,S,Z,J,L]
+
 color : Tetromino -> Color
 color = .color
 
@@ -87,9 +91,6 @@ move (dX, dY) tetromino =
 --
 -- Factory
 --
-
--- @TODO: lazy seedable random bag generator
---createRandomBag : Int -> (Pos2 -> Tetromino)
 
 create : Kind -> Pos2 -> Tetromino
 create kind position =
