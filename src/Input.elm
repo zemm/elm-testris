@@ -3,49 +3,62 @@ module Input where
 import Signal
 import Keyboard
 import Time
+import Maybe
 
 import Board
 import Tetromino
 
-data Source = User | Clock
-
+data Source = User | System
 data MoveDir = Left | Right
-
-data RotDir = CW | CCW
+data RotateDir = CW | CCW
 
 data Action =
-    SoftDrop Source
+    Tick Time
+  | Pause
+  | SoftDrop
   | HardDrop
   | Move MoveDir
-  | Rotate RotDir
+  | Rotate RotateDir
 
-{-
+input : Signal (Maybe Action)
+input = userInput
+--input = Signal.merge userInput systemInput
 
-@TODO:
+{- System input (clock)
 
-lazy seedable random bag Tetromino generator
-
-createRandomBag : [(Pos2 -> Tetromino)] -> Pos2 -> Tetromino -- kinds could be factories
-createRandomBag seed kinds startPos =
-
-createSeededRandomBag : Int -> [Kind] -> Pos2 -> Tetromino
-createSeededRandomBag seed kinds startPos =
-
-60fps clock
-
-left / right movement (keyboard)
-    - repeat with a delay on keydown
-
-cw / ccw rotation (keyboard)
-
-tunable soft drop signals (clock)
+@TODO: 60fps clock
+@TODO: reset clock (pause etc)
+@TODO: Tunable soft drop signals (clock)
   - requires tunable / depends on another signal - was this not currently possible?
   - or should the logic for this be elsewhere?
 
-soft drop signals (keyboard)
-
-hard drop signals (keyboard)
-
-combine and tag signals to action singals
-
 -}
+
+systemInput : Signal Action
+systemInput = (\d -> Tick d) <~ clock
+
+clock : Signal Time
+clock = fps 60
+
+{- User input (keys)
+@TODO: repeat with a delay
+@TODO: rotateCCW
+-}
+
+userInput : Signal (Maybe Action)
+userInput = Signal.keepIf Maybe.isJust Nothing <| Signal.merges
+  [ mapArrows <~ Keyboard.arrows
+  , mapTrueTo HardDrop <~ Keyboard.space
+  , mapTrueTo Pause <~ Keyboard.enter
+  ]
+
+mapTrueTo : Action -> Bool -> Maybe Action
+mapTrueTo action space = if space then Just action else Nothing
+
+mapArrows : {x:Int, y:Int} -> Maybe Action
+mapArrows {x,y} =
+  if | x > 0     -> Just (Move Right)
+     | x < 0     -> Just (Move Left)
+     | y < 0     -> Just SoftDrop
+     | y > 0     -> Just (Rotate CW)
+     | otherwise -> Nothing
