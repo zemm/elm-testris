@@ -41,6 +41,7 @@ clock : Signal Time
 clock = fps 60
 
 {- User input (keys)
+@TODO: soft drop could, instead of dropping, increase the gravity
 @TODO: repeat with a delay
 @TODO: rotateCCW
 -}
