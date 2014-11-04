@@ -83,6 +83,18 @@ rotateCW tetromino = { tetromino | rotation <- (tetromino.rotation + 1) % 4 }
 rotateCCW : Tetromino -> Tetromino
 rotateCCW tetromino = { tetromino | rotation <- (tetromino.rotation - 1) % 4 }
 
+rotate : Rotation -> Tetromino -> Tetromino
+rotate rotation tetromino = { tetromino | rotation <- rotation % 4 }
+
+moveLeft : Tetromino -> Tetromino
+moveLeft = move (-1, 0)
+
+moveRight : Tetromino -> Tetromino
+moveRight = move (1, 0)
+
+moveDown : Tetromino -> Tetromino
+moveDown = move (0, -1)
+
 move : Pos2 -> Tetromino -> Tetromino
 move (dX, dY) tetromino =
   let (oldX, oldY) = tetromino.position
